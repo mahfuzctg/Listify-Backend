@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import ListModel from "../models/list.model";
 
-// Create a new list
 export const createList = async (req: Request, res: Response) => {
   try {
     const { title, desc, date, items, image, link } = req.body;
@@ -13,7 +12,22 @@ export const createList = async (req: Request, res: Response) => {
         .json({ message: "Title, description, and date are required." });
     }
 
-    const newList = new ListModel({ title, desc, date, items, image, link });
+    // Ensure date is in 'YYYY-MM-DD' format (in case it comes in another format)
+    const formattedDate = new Date(date);
+    const year = formattedDate.getFullYear();
+    const month = String(formattedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(formattedDate.getDate()).padStart(2, "0");
+    const formattedDateString = `${year}-${month}-${day}`;
+
+    const newList = new ListModel({
+      title,
+      desc,
+      date: formattedDateString, // Use the formatted date here
+      items,
+      image,
+      link,
+    });
+
     await newList.save();
     res.status(201).json(newList);
   } catch (err) {
